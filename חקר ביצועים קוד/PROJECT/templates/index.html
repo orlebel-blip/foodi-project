@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>FOODI - חיפוש מסעדה</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <style>
+    .gps-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .btn-main {
+      margin-top: 15px;
+      padding: 12px 16px;
+      background: #a87c5f;
+      color: white;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-main:hover { background: #5a3d2b; }
+    #locationBtn {
+      margin-top: 8px;
+      padding: 10px 12px;
+      width: 100%;
+      background: #c65e3b;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #locationBtn:hover { background: #8e3b22; }
+  </style>
+</head>
+
+<body>
+
+  <div class="logo-wrapper">
+    <img src="{{ url_for('static', filename='foodi-logo.png') }}" alt="FOODI Logo">
+  </div>
+
+  <div class="tagline">מסעדות מומלצות במרחק קליק!</div>
+
+  <div class="container">
+    <h1>חיפוש מסעדה לפי מיקום</h1>
+
+    <!-- הטופס שמחפש מסעדות -->
+    <form id="searchForm" action="/find" method="get">
+
+      <div class="gps-row">
+        <div style="flex: 1;">
+          <label>שם פרטי:</label>
+          <input type="text" name="first_name" required>
+        </div>
+
+        <div style="flex: 1;">
+          <label>שם משפחה:</label>
+          <input type="text" name="last_name" required>
+        </div>
+      </div>
+
+      <div class="gps-row">
+        <div style="flex: 1;">
+          <label>טלפון:</label>
+          <input type="tel" name="phone" maxlength="10" required>
+        </div>
+
+        <div style="flex: 1;">
+          <label>כמות סועדים:</label>
+          <input type="number" name="guests" min="1" max="20" required>
+        </div>
+      </div>
+
+      <div class="gps-row">
+        <div style="flex: 1;">
+          <label>טלפון נוסף:</label>
+          <input type="tel" name="phone2" maxlength="10">
+        </div>
+
+        <div style="flex: 1;">
+          <label>סוג אוכל:</label>
+          <input list="foodTypes" name="type" placeholder="למשל: איטלקי, שף" required>
+          <datalist id="foodTypes">
+            <option value="איטלקי">
+            <option value="שף">
+            <option value="אסיאתי">
+            <option value="בשרי">
+            <option value="טבעוני">
+            <option value="מזרחי">
+            <option value="חלבי">
+            <option value="סושי">
+          </datalist>
+        </div>
+      </div>
+
+      <label>מיקום (GPS):</label>
+      <div class="gps-row">
+        <input type="text" id="lat" name="lat" placeholder="קו רוחב" readonly required>
+        <input type="text" id="lon" name="lon" placeholder="קו אורך" readonly required>
+      </div>
+
+      <button type="button" id="locationBtn" onclick="getLocation()">📍 אתר אותי</button>
+
+      <button type="submit" class="btn-main">🔍 חפש מסעדה</button>
+    </form>
+
+    <hr>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a class="btn" href="/results">תוצאות לידך (חיזוי עומסים)</a>
+      <a class="btn" href="/report">📣 דווח על עומס במסעדה</a>
+    </div>
+  </div>
+
+  <script>
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(pos) {
+          document.getElementById("lat").value = pos.coords.latitude.toFixed(6);
+          document.getElementById("lon").value = pos.coords.longitude.toFixed(6);
+        }, function() {
+          alert("יש לאפשר גישה ל־GPS כדי לקבל מיקום.");
+        });
+      } else {
+        alert("הדפדפן לא תומך ב־GPS.");
+      }
+    }
+  </script>
+
+</body>
+</html>

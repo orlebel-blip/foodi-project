@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>תוצאות חיפוש מסעדה</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="logo-wrapper">
+    <img src="{{ url_for('static', filename='foodi-logo.png') }}" alt="FOODI Logo">
+  </div>
+
+  <div class="container">
+    <h1>תוצאות החיפוש</h1>
+
+    {% if error %}
+      <p style="color:red; font-weight:bold;">{{ error }}</p>
+    {% endif %}
+
+    {% if results %}
+    <table>
+      <tr>
+        <th>שם מסעדה</th>
+        <th>מרחק (ק״מ)</th>
+        <th>זמן המתנה חזוי</th>
+        <th>ניווט</th>
+        <th>דיווח</th>
+      </tr>
+
+      {% for r in results %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td>{{ r.distance_km }}</td>
+        <td>{{ r.predicted_wait }} דק׳</td>
+        <td>
+          <a class="btn"
+             href="https://www.google.com/maps/search/?api=1&query={{ r.lat }},{{ r.lon }}"
+             target="_blank">מפה</a>
+        </td>
+        <td>
+          <a class="btn" href="/report?restaurant_id={{ r.restaurant_id }}">📣 דווח עומס</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+      <p>לא נמצאו מסעדות מתאימות.</p>
+    {% endif %}
+
+    <div style="margin-top: 20px;">
+      <a class="btn" href="/">⬅ חזרה לעמוד הראשי</a>
+    </div>
+  </div>
+
+</body>
+</html>

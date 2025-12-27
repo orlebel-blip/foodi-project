@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>דיווח עומס במסעדה</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="container">
+    <h2 class="page-title">📣 דיווח עומס למסעדה</h2>
+
+    <form method="post" action="/report" class="form-card" novalidate>
+
+      <div class="form-group">
+        <label for="phone">טלפון (לאימות אמינות):</label>
+        <input
+          id="phone"
+          name="phone"
+          type="text"
+          inputmode="numeric"
+          autocomplete="tel"
+          placeholder="0501234567"
+          maxlength="10"
+          required
+          oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)"
+        >
+        <small class="hint">10 ספרות בלבד (בלי מקפים/רווחים).</small>
+      </div>
+
+      <div class="form-group">
+        <label for="restaurant_id">מסעדה:</label>
+        <select id="restaurant_id" name="restaurant_id" required>
+          <option value="" disabled {% if not preselected %}selected{% endif %}>בחרי מהרשימה…</option>
+          {% for r in restaurants %}
+            <option value="{{ r.id }}"
+              {% if preselected and preselected == r.id %}selected{% endif %}>
+              {{ r.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="wait_minutes">זמן המתנה (בדקות):</label>
+        <input id="wait_minutes" name="wait_minutes" type="number" min="0" value="15" required>
+      </div>
+
+      <div class="form-group">
+        <label for="seats_free">מקומות פנויים (אופציונלי):</label>
+        <input id="seats_free" name="seats_free" type="number" min="0" placeholder="לדוגמה: 4">
+      </div>
+
+      <button class="btn" type="submit">שליחה</button>
+    </form>
+
+    <p class="back-link">
+      <a class="btn btn-secondary" href="/">⬅ חזרה לדף הבית</a>
+    </p>
+  </div>
+
+  <script>
+    // חסימה "כמו בדף החיפוש": גם הדבקה וגם הקלדה
+    const phone = document.getElementById("phone");
+    phone.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData("text");
+      phone.value = text.replace(/[^0-9]/g, "").slice(0, 10);
+    });
+
+    document.querySelector(".form-card").addEventListener("submit", (e) => {
+      const ok = /^[0-9]{10}$/.test(phone.value);
+      if (!ok) {
+        e.preventDefault();
+        phone.focus();
+        alert("מספר טלפון לא תקין. יש להזין 10 ספרות בלבד.");
+      }
+    });
+  </script>
+</body>
+</html>
