@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול מסעדות</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: right; }
+        th { background-color: #f2f2f2; }
+        .btn { background: #8a4b35; color: white; padding: 6px 10px; border-radius: 5px; text-decoration: none; }
+        .btn:hover { background: #5a2d1f; }
+        .title { font-size: 26px; margin-bottom: 20px; }
+        form { background: #fafafa; padding: 15px; border-radius: 10px; margin-bottom: 30px; }
+        .gps-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .gps-row input { width: 145px; }
+    </style>
+</head>
+
+<body>
+
+<h1 class="title">ניהול מסעדות</h1>
+
+<!-- ===== טופס הוספת מסעדה ===== -->
+<form action="/admin" method="POST">
+
+    <div class="form-group">
+        <label>שם מסעדה:</label>
+        <input type="text" name="name" required>
+    </div>
+
+    <div class="form-group">
+  <label>סוג אוכל:</label>
+  <select name="type" required>
+    <option value="">— בחרי סוג —</option>
+    <option value="italian">איטלקי</option>
+    <option value="chef">שף</option>
+    <option value="asian">אסיאתי</option>
+    <option value="meat">בשרי</option>
+    <option value="middle_eastern">מזרחי</option>
+    <option value="dairy">חלבי</option>
+    <option value="sushi">המבורגר</option>
+  </select>
+</div>
+
+
+    <div class="form-group">
+        <label>מיקום המסעדה:</label>
+        <div class="gps-row">
+            <input
+                type="number"
+                step="any"
+                name="lat"
+                id="lat"
+                placeholder="Latitude"
+                required
+            >
+            <input
+                type="number"
+                step="any"
+                name="lon"
+                id="lon"
+                placeholder="Longitude"
+                required
+            >
+        </div>
+
+        <button type="button" id="locationBtn" class="btn">
+            📍 אתרי אותי
+        </button>
+    </div>
+
+    <button type="submit" class="btn">➕ הוסף מסעדה</button>
+</form>
+
+<!-- ===== טבלת מסעדות ===== -->
+<h2>רשימת מסעדות במערכת</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>שם</th>
+            <th>סוג</th>
+            <th>מצב</th>
+            <th>זמן המתנה</th>
+            <th>פעולה</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in restaurants %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ r.type }}</td>
+            <td>{{ "פנויה" if r.available else "תפוסה" }}</td>
+            <td>{{ r.wait_time }} דקות</td>
+            <td>
+                <form action="/admin/restaurant/{{ r.id }}/toggle" method="POST">
+                    <button class="btn" type="submit">
+                        {% if r.available %}כבה{% else %}הפעל{% endif %}
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p style="margin-top: 20px;">
+    <a href="/" class="btn">⬅ חזרה לדף הבית</a>
+</p>
+
+<!-- ===== JS: איתור מיקום ===== -->
+<script>
+    const locationBtn = document.getElementById("locationBtn");
+
+    locationBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+            alert("הדפדפן לא תומך באיתור מיקום");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                document.getElementById("lat").value = position.coords.latitude;
+                document.getElementById("lon").value = position.coords.longitude;
+            },
+            () => {
+                alert("לא ניתן לאתר מיקום. בדקי הרשאות מיקום בדפדפן.");
+            }
+        );
+    });
+</script>
+
+</body>
+</html>
