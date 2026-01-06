@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "restaurant_id": 1,
+    "wait_minutes": 45,
+    "created_at": "2026-01-03T19:19:15.298938"
+  },
+  {
+    "id": 2,
+    "restaurant_id": 97,
+    "wait_minutes": 3,
+    "created_at": "2026-01-03T19:45:01.265030"
+  },
+  {
+    "id": 3,
+    "restaurant_id": 1,
+    "wait_minutes": 34,
+    "created_at": "2026-01-04T19:28:35.728046"
+  },
+  {
+    "id": 4,
+    "restaurant_id": 4,
+    "wait_minutes": 60,
+    "created_at": "2026-01-04T19:29:25.679975"
+  },
+  {
+    "id": 5,
+    "restaurant_id": 1,
+    "wait_minutes": 12,
+    "created_at": "2026-01-04T19:30:12.880401"
+  },
+  {
+    "id": 6,
+    "restaurant_id": 1,
+    "wait_minutes": 0,
+    "created_at": "2026-01-04T19:30:58.654899"
+  },
+  {
+    "id": 7,
+    "restaurant_id": 1,
+    "wait_minutes": 0,
+    "created_at": "2026-01-04T19:31:50.953635"
+  },
+  {
+    "id": 8,
+    "restaurant_id": 1,
+    "wait_minutes": 1,
+    "created_at": "2026-01-04T19:32:21.866749"
+  },
+  {
+    "id": 9,
+    "restaurant_id": 1,
+    "wait_minutes": 25,
+    "created_at": "2026-01-04T19:34:01.171434"
+  },
+  {
+    "id": 10,
+    "restaurant_id": 1,
+    "wait_minutes": 40,
+    "created_at": "2026-01-04T19:34:32.949336"
+  },
+  {
+    "id": 11,
+    "restaurant_id": 1,
+    "wait_minutes": 60,
+    "created_at": "2026-01-04T19:35:00.703205"
+  },
+  {
+    "id": 12,
+    "restaurant_id": 1,
+    "wait_minutes": 70,
+    "created_at": "2026-01-04T19:35:28.691359"
+  },
+  {
+    "id": 13,
+    "restaurant_id": 1,
+    "wait_minutes": 95,
+    "created_at": "2026-01-04T19:35:56.045837"
+  },
+  {
+    "id": 14,
+    "restaurant_id": 42,
+    "wait_minutes": 30,
+    "created_at": "2026-01-04T19:37:00.157811"
+  },
+  {
+    "id": 15,
+    "restaurant_id": 1,
+    "wait_minutes": 40,
+    "created_at": "2026-01-06T16:41:17.135908"
+  }
+]
