@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>דיווח עומס במסעדה</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="container">
+    <h2>📣 דיווח עומס למסעדה</h2>
+
+    {# הודעת שגיאה מהשרת (אם יש) #}
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/report">
+
+      <!-- ✅ טלפון: רק ספרות + אורך תקין (נייד ישראלי: 10 ספרות מתחיל ב-05) -->
+      <label for="phone">טלפון (לאימות אמינות):</label>
+      <input
+        id="phone"
+        name="phone"
+        type="tel"
+        inputmode="numeric"
+        autocomplete="tel"
+        placeholder="לדוגמה: 0521234567"
+        maxlength="10"
+        pattern="^05\d{8}$"
+        title="מספר תקין בישראל: 10 ספרות ומתחיל ב-05"
+        required
+      />
+      <small class="hint">10 ספרות, מתחיל ב־05 (לדוגמה 0521234567)</small>
+
+      <!-- ✅ בחירת מסעדה: מיושר ויפה יותר + placeholder -->
+      <label for="restaurant_id">בחר מסעדה:</label>
+      <select id="restaurant_id" name="restaurant_id" required>
+        <option value="" disabled {% if not preselected %}selected{% endif %}>בחרי מסעדה…</option>
+        {% for r in restaurants %}
+          <option value="{{ r.id }}"
+            {% if preselected and preselected == r.id %}selected{% endif %}>
+            {{ r.name }}{% if r.type %} ({{ r.type }}){% endif %}
+          </option>
+        {% endfor %}
+      </select>
+
+      <label for="wait_minutes">זמן המתנה (בדקות):</label>
+      <input id="wait_minutes" name="wait_minutes" type="number" min="0" value="15" required>
+
+      <label for="seats_free">מקומות פנויים (אופציונלי):</label>
+      <input id="seats_free" name="seats_free" type="number" min="0">
+
+      <button class="btn" type="submit">שליחה</button>
+    </form>
+
+    <p><a class="btn" href="/">⬅ חזרה לדף הבית</a></p>
+  </div>
+
+  <!-- ✅ מנקה כל תו שהוא לא ספרה + מגביל ל-10 ספרות בזמן הקלדה -->
+  <script>
+    const phoneInput = document.getElementById("phone");
+    phoneInput.addEventListener("input", () => {
+      phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+    });
+  </script>
+</body>
+</html>
