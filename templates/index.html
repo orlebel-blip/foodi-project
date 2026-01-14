@@ -140,22 +140,28 @@
 
   <!-- JS GPS -->
   <script>
-    function getLocation() {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          function (pos) {
-            document.getElementById("lat").value = pos.coords.latitude.toFixed(6);
-            document.getElementById("lon").value = pos.coords.longitude.toFixed(6);
-          },
-          function () {
-            alert("יש לאפשר גישה ל־GPS כדי לקבל מיקום.");
-          }
-        );
-      } else {
-        alert("הדפדפן לא תומך ב־GPS.");
-      }
+  function getLocation() {
+  if (!navigator.geolocation) {
+    alert("הדפדפן לא תומך ב־GPS");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function (pos) {
+      document.getElementById("lat").value = pos.coords.latitude.toFixed(6);
+      document.getElementById("lon").value = pos.coords.longitude.toFixed(6);
+    },
+    function (err) {
+      alert("לא ניתן לקבל מיקום מדויק. ודאי שאישרת גישה למיקום.");
+    },
+    {
+      enableHighAccuracy: true,   // 🔥 זה העיקר
+      timeout: 10000,
+      maximumAge: 0
     }
-  </script>
+  );
+}
+</script>
 
 </body>
 </html>
