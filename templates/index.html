@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+   function gtag(){dataLayer.push(arguments);}
+   gtag('js', new Date());
+   gtag('config', 'G-PZY8D0NJ9C');
+  </script>
   <meta charset="UTF-8">
   <title>FOODI - חיפוש מסעדה</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,14 +104,17 @@
           <label>סוג אוכל:</label>
           <input list="foodTypes" name="type" placeholder="למשל: איטלקי, שף" required>
           <datalist id="foodTypes">
-            <option value="איטלקי">
-            <option value="שף">
-            <option value="אסיאתי">
-            <option value="בשרי">
-            <option value="טבעוני">
+             <option value="איטלקי">
+             <option value="אסייתי">
+            <option value="בשרים">
+            <option value="המבורגר">
             <option value="מזרחי">
+            <option value="בר-מסעדה">
             <option value="חלבי">
-            <option value="סושי">
+
+          </datalist>
+
+
           </datalist>
         </div>
       </div>

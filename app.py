@@ -4,6 +4,8 @@ import json
 import os
 from datetime import datetime, timedelta
 from flask_sqlalchemy import SQLAlchemy
+import numpy as np
+from scipy.optimize import linear_sum_assignment
 
 # ======================= הגדרות אפליקציה ו-DB =======================
 app = Flask(__name__)
@@ -61,6 +63,15 @@ TYPE_CANONICAL = {
     # איטלקי
     "איטלקית": "איטלקי",
     "איטלקי": "איטלקי",
+
+    # חלבי / בתי קפה
+   "חלבי": "חלבי",
+   "בית קפה": "חלבי",
+
+# ברים
+  "בר מסעדה": "בר-מסעדה",
+  "בר-מסעדה": "בר-מסעדה"
+
 }
 
 def normalize_type(s: str) -> str:
@@ -146,8 +157,8 @@ def seed_restaurants():
         { "name": "בולגורג'י", "type": "מזרחי", "lat": 31.779914, "lon": 35.213314 },
 
         # ===== בתי קפה / בר =====
-        { "name": "תמול שלשום", "type": "בית קפה", "lat": 31.778400, "lon": 35.215200 },
-        { "name": "נוקטורנו", "type": "בית קפה", "lat": 31.778000, "lon": 35.214400 },
+        { "name": "תמול שלשום", "type": "חלבי", "lat": 31.778400, "lon": 35.215200 },
+        { "name": "נוקטורנו", "type": "חלבי", "lat": 31.778000, "lon": 35.214400 },
         { "name": "מונה", "type": "בר-מסעדה", "lat": 31.779600, "lon": 35.217800 },
         { "name": "אדום", "type": "בר-מסעדה", "lat": 31.779200, "lon": 35.217300 },
         { "name": "Chakra", "type": "בר-מסעדה", "lat": 31.780200, "lon": 35.218200 },
@@ -156,7 +167,6 @@ def seed_restaurants():
         { "name": "Reshta", "type": "בר-מסעדה", "lat": 31.779914, "lon": 35.213714 },
         { "name": "Beer Bazaar", "type": "בר-מסעדה", "lat": 31.785214, "lon": 35.212914 },
         { "name": "Modern (מוזיאון ישראל)", "type": "בר-מסעדה", "lat": 31.772514, "lon": 35.204114 },
-        { "name": "02", "type": "בר-מסעדה", "lat": 31.770914, "lon": 35.222514 },
         { "name": "Happy Fish", "type": "בר-מסעדה", "lat": 31.776882, "lon": 35.224911 },
 
         # ===== תוספות =====
@@ -193,18 +203,21 @@ def seed_restaurants():
         { "name": "David 16", "type": "בר-מסעדה", "lat": 31.777900, "lon": 35.224300 }
     ]
 
-    return data
-
+    
     for item in data:
-        if Restaurant.query.filter_by(name=item["name"]).first():
-            continue
-        db.session.add(Restaurant(
-            name=item["name"],
-            type=normalize_type(item.get("type")),  # ✅ תיקון
-            lat=item.get("lat"),
-            lon=item.get("lon"),
-        ))
+       if Restaurant.query.filter_by(name=item["name"]).first():
+          continue
+
+       db.session.add(Restaurant(
+         name=item["name"],
+         type=normalize_type(item.get("type")),
+         lat=item.get("lat"),
+         lon=item.get("lon"),
+    ))
+
     db.session.commit()
+
+
 
 # ======================= קבצי JSON =======================
 RESVJSON = "reservations.json"
@@ -242,6 +255,45 @@ def haversine(lat1, lon1, lat2, lon2):
     dlon = math.radians(lon2 - lon1)
     a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1))*math.cos(math.radians(lat2))*math.sin(dlon/2)**2
     return 2 * R * math.asin(math.sqrt(a))
+
+MAX_DISTANCE = 10.0   # ק"מ – מרחק עירוני סביר
+MAX_WAIT = 60.0       # דקות – זמן המתנה מקסימלי
+
+def hungarian_top_k_restaurants_for_client(
+    client_lat,
+    client_lon,
+    restaurants,
+    k=5,
+    distance_weight=3.0,
+    wait_weight=1.0
+):
+    remaining = restaurants.copy()
+    ranked = []
+
+    for _ in range(min(k, len(remaining))):
+        cost_matrix = np.zeros((1, len(remaining)))
+
+        for j, r in enumerate(remaining):
+            d = haversine(client_lat, client_lon, r["lat"], r["lon"])
+            wait, _ = weighted_prediction_for_restaurant(r)
+
+            distance_norm = d / MAX_DISTANCE
+            wait_norm = wait / MAX_WAIT
+
+            cost_matrix[0, j] = (
+            0.7 * distance_norm +   # העדפה למרחק
+            0.3 * wait_norm)
+
+
+        row_ind, col_ind = linear_sum_assignment(cost_matrix)
+        best_index = col_ind[0]
+
+        best_restaurant = remaining[best_index]
+        ranked.append(best_restaurant)
+        remaining.pop(best_index)
+
+    return ranked
+
 
 # ======================= Predictor =======================
 DEFAULT_WAIT = 25
@@ -307,7 +359,11 @@ def find_restaurant():
     cuisine = normalize_type(cuisine)
 
     if lat is None or lon is None:
-        return render_template("results_search.html", results=[], error="לא התקבל מיקום. יש ללחוץ על 'אתר אותי'.")
+        return render_template(
+            "results_search.html",
+            results=[],
+            error="לא התקבל מיקום. יש ללחוץ על 'אתר אותי'."
+        )
 
     restaurants = load_restaurants()
     results = []
@@ -321,16 +377,30 @@ def find_restaurant():
             continue
 
         d = haversine(lat, lon, r["lat"], r["lon"])
-
         b = predicted_wait_bundle(r)
+        b["id"] = r["id"]                 # ← זו השורה החסרה
         b["distance_km"] = round(d, 2)
         b["lat"] = r["lat"]
         b["lon"] = r["lon"]
 
         results.append(b)
 
-    results.sort(key=lambda x: x["distance_km"])
-    return render_template("results_search.html", results=results, error=None)
+        
+
+    # 🔥 האלגוריתם ההונגרי – מחוץ ללולאה
+    ranked_results = hungarian_top_k_restaurants_for_client(
+    client_lat=lat,
+    client_lon=lon,
+    restaurants=results,
+    k=5
+)
+
+
+    return render_template(
+        "results_search.html",
+        results=ranked_results,
+        error=None
+    )
 
 # ======================= דיווח עומס =======================
 @app.route("/report", methods=["GET", "POST"])
@@ -414,3 +484,15 @@ def admin_page():
         return redirect(url_for("admin_page"))
 
     return render_template("admin.html", restaurants=Restaurant.query.all())
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+        cleanup_types_in_db()   # ← זה קריטי
+
+        if Restaurant.query.count() == 0:
+            seed_restaurants()
+
+    app.run(debug=True)
+
+
